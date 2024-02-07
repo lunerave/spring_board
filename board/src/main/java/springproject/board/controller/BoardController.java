@@ -34,7 +34,18 @@ public class BoardController {
         List<BoardDTO> boardDTOList = boardService.findAll();
         model.addAttribute("boardList", boardDTOList);
         return "boards";
+    }
 
+    @GetMapping("/{boardId}")
+    public String findById(@PathVariable Long boardId, Model model) {
+        /*
+            해당 게시글의 조회수 1+
+            게시글 데이터 가져와서 출력
+         */
+         boardService.updateHits(boardId);
+         BoardDTO boardDTO = boardService.findById(boardId);
+        model.addAttribute("board", boardDTO);
+        return "board";
     }
 
 }
