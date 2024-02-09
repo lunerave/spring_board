@@ -17,3 +17,4 @@
    - 수정 처리  
 5. 글 삭제(/board/delete/{id})
 6. 페이징처리(/board/paging)
+   - /board/pagin?page=1
