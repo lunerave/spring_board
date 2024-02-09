@@ -1,6 +1,10 @@
 package springproject.board.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import springproject.board.dto.BoardDTO;
@@ -55,5 +59,18 @@ public class BoardService {
 
     public void delete(Long boardId) {
         boardRepository.deleteById(boardId);
+    }
+
+    public Page<BoardDTO> paging(Pageable pageable) {
+        int page = pageable.getPageNumber() - 1; // page 위치에 있는 값은 0부터 시작
+        int pageLimit = 3; // 한 페이지에 몇개의 게시글을 보여 줄 것 인지
+        // 한 페이지에 3개씩 게시글을 보여주고 정렬 기준은 boardId 기준으로 내림차순 => 최신 게시물이 가장 먼저 나온다
+        Page<BoardEntity> boardEntities = boardRepository.findAll(PageRequest.of(page, pageLimit, Sort.by(Sort.Direction.DESC, "boardId")));
+
+
+        // id, writer, title, hits, creatdTime 필요
+        Page<BoardDTO> boardDTOS = boardEntities.map(board ->
+                new BoardDTO(board.getBoardId(), board.getBoardWriter(), board.getBoardTitle(), board.getBoardHits(), board.getCreatedTime()));
+        return boardDTOS;
     }
 }

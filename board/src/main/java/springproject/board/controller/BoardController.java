@@ -1,6 +1,9 @@
 package springproject.board.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +40,7 @@ public class BoardController {
     }
 
     @GetMapping("/{boardId}")
-    public String findById(@PathVariable Long boardId, Model model) {
+    public String findById(@PathVariable Long boardId, Model model, @PageableDefault(page=1) Pageable pageable) {
         /*
             해당 게시글의 조회수 1+
             게시글 데이터 가져와서 출력
@@ -45,6 +48,7 @@ public class BoardController {
          boardService.updateHits(boardId);
          BoardDTO boardDTO = boardService.findById(boardId);
         model.addAttribute("board", boardDTO);
+        model.addAttribute("page", pageable.getPageNumber());
         return "board";
     }
 
@@ -67,5 +71,21 @@ public class BoardController {
     public String delete(@PathVariable Long boardId) {
         boardService.delete(boardId);
         return "redirect:/board";
+    }
+
+    // /board/paging?page=1
+    @GetMapping("/paging")
+    public String paging(@PageableDefault(page = 1) Pageable pageable, Model model) {
+//        pageable.getPageNumber();
+        Page<BoardDTO> boardList = boardService.paging(pageable);
+        int blockLimit = 3;
+        int startPage = (((int)(Math.ceil((double)pageable.getPageNumber() / blockLimit))) - 1) * blockLimit + 1; // 1 4 7 10 ~~
+        int endPage = ((startPage + blockLimit - 1) < boardList.getTotalPages()) ? startPage + blockLimit - 1 : boardList.getTotalPages();
+
+        model.addAttribute("boardList", boardList);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+
+        return "paging";
     }
 }
